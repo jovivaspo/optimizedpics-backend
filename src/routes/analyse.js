@@ -3,6 +3,6 @@ const controllerApp = require("../controllers/controllerApp");
 
 const router = new Router();
 
-router.get("/", controllerApp.analyse);
+router.post("/", controllerApp.analyse);
 
 module.exports = router;
