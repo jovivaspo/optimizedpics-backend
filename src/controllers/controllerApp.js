@@ -12,13 +12,13 @@ controllerApp.analyse = async (req, res) => {
   }
 
   try {
+    //OBTENEMOS HOST Y PROTOCOLO
     const hostname = new URL(url).hostname;
     const protocol = new URL(url).protocol;
 
+    //OBTEMOS HTML E IMÁGENES
     const resUrl = await fetch(url);
-
     const html = await resUrl.text();
-
     const $ = cheerio.load(html);
 
     if ($("img").length === 0) {
@@ -29,8 +29,9 @@ controllerApp.analyse = async (req, res) => {
     }
 
     const images = $("img").toArray();
-
-    const urlsImages = images
+    
+    //OBTENEMOS SRC DE LAS IMÁGENES
+    let urlsImages = images
       .map((image) => {
         const src = image.attribs.src || image.attribs["data-src"];
         if (src?.startsWith("/")) return protocol + "//" + hostname + src;
@@ -39,6 +40,7 @@ controllerApp.analyse = async (req, res) => {
       })
       .filter((src) => src);
 
+    //CONTROL DE ERRORES
     if (urlsImages.length === 0) {
       const error = new Error("Imposible tomar las imágenes en esta web");
       return res.status(404).json({
@@ -46,7 +48,11 @@ controllerApp.analyse = async (req, res) => {
       });
     }
 
-    const imagesSizes = await Promise.all(
+    //ELIMINAR IMÁGENES REPETIDAS
+    urlsImages = Array.from(new Set(urlsImages))
+    
+    //OBTENEMOS LA INFORMACIÓN DE LAS IMÁGENES
+    let imagesInfo = await Promise.all(
       urlsImages.map(async (image) => {
         try {
           const res = await fetch(image);
@@ -61,17 +67,36 @@ controllerApp.analyse = async (req, res) => {
           };
         } catch (error) {
           console.log(error);
-          return { image, size: undefined, timeLoad: undefined };
+          return { image, size: undefined, format: undefined, width: undefined, height: undefined };
         }
       })
     );
 
-    console.log(imagesSizes);
+     //ELIMINAR IMÁGENES SIN INFORMACIÓN
+     imagesInfo = imagesInfo.filter((image)=>image.size)
 
-    return res.json({ imagesDefault: imagesSizes });
+     //CONTROL DE ERRORES
+     if(imagesInfo.length === 0){
+      const error = new Error("Imposible analizar las imágenes de esta web");
+      return res.status(404).json({
+        error: error.message,
+      });
+     }
+
+    return res.json({ imagesDefault:  imagesInfo });
   } catch (error) {
     console.log(error);
   }
 };
+
+controllerApp.optimize = async (req, res) => {
+  const {images} = req.body
+  if(!images){
+    return res.status(400).json({ error: "Petición incorrecta" });
+  }
+
+  res.json({message:"ok"})
+
+}
 
 module.exports = controllerApp;

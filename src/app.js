@@ -9,6 +9,6 @@ app.set("port", process.env.PORT);
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/analyse", require("./routes/analyse"));
+app.use("/api", require("./routes/api"));
 
 module.exports = app;
