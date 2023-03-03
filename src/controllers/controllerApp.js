@@ -1,6 +1,10 @@
 const { URL } = require("url");
 const cheerio = require("cheerio");
 const sharp = require("sharp");
+const upload = require("../services/upload-cloudinary");
+const generateUrl = require("../services/generate-url");
+const getName = require("../services/get-name");
+const searchCloudinary = require("../services/search-cloudinary");
 
 const controllerApp = {};
 
@@ -29,7 +33,7 @@ controllerApp.analyse = async (req, res) => {
     }
 
     const images = $("img").toArray();
-    
+
     //OBTENEMOS SRC DE LAS IMÁGENES
     let urlsImages = images
       .map((image) => {
@@ -49,8 +53,8 @@ controllerApp.analyse = async (req, res) => {
     }
 
     //ELIMINAR IMÁGENES REPETIDAS
-    urlsImages = Array.from(new Set(urlsImages))
-    
+    urlsImages = Array.from(new Set(urlsImages));
+
     //OBTENEMOS LA INFORMACIÓN DE LAS IMÁGENES
     let imagesInfo = await Promise.all(
       urlsImages.map(async (image) => {
@@ -67,36 +71,81 @@ controllerApp.analyse = async (req, res) => {
           };
         } catch (error) {
           console.log(error);
-          return { image, size: undefined, format: undefined, width: undefined, height: undefined };
+          return {
+            image,
+            size: undefined,
+            format: undefined,
+            width: undefined,
+            height: undefined,
+          };
         }
       })
     );
 
-     //ELIMINAR IMÁGENES SIN INFORMACIÓN
-     imagesInfo = imagesInfo.filter((image)=>image.size)
+    //ELIMINAR IMÁGENES SIN INFORMACIÓN
+    imagesInfo = imagesInfo.filter((image) => image.size);
 
-     //CONTROL DE ERRORES
-     if(imagesInfo.length === 0){
+    //CONTROL DE ERRORES
+    if (imagesInfo.length === 0) {
       const error = new Error("Imposible analizar las imágenes de esta web");
       return res.status(404).json({
         error: error.message,
       });
-     }
+    }
 
-    return res.json({ imagesDefault:  imagesInfo });
+    return res.json({ imagesDefault: imagesInfo });
   } catch (error) {
     console.log(error);
   }
 };
 
 controllerApp.optimize = async (req, res) => {
-  const {images} = req.body
-  if(!images){
+  const { images } = req.body;
+
+  if (!images) {
     return res.status(400).json({ error: "Petición incorrecta" });
   }
 
-  res.json({message:"ok"})
+  try {
+    //OBTENEMOS NOMBRE DE LA IMAGEN
+    let newImages = images.map((image) => {
+      return { ...image, name: getName(image.image) };
+    });
 
-}
+    //VERIFICAR QUE NO EXISTE
+    newImages = await Promise.all(
+      newImages.map(async (image) => {
+        const checking = await searchCloudinary(image.name);
+        return { ...image, checking };
+      })
+    );
+
+    //SUBIDA DE IMÁGENES A CLOUDINARY Y OBTENEMOS NUEVA URL DE IMG OPTIMIZADA
+    newImages = await Promise.all(
+      newImages.map(async (image) => {
+        const res = await upload(image);
+
+        if (res.error) {
+          return { ...image, "new-image": "Error al subir la imagen" };
+        }
+        return {
+          ...image,
+          "new-image": generateUrl(res.public_id),
+        };
+      })
+    );
+
+    //ELIMINAMOS ATRIBUTOS QUE NO NOS INTERESAN
+    newImages.map((image) => {
+      delete image.name;
+      delete image.checking;
+      return { ...image };
+    });
+
+    return res.json({ imagesOptimized: newImages });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 module.exports = controllerApp;
