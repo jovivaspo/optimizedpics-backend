@@ -128,9 +128,11 @@ controllerApp.optimize = async (req, res) => {
         if (res.error) {
           return { ...image, "new-image": "Error al subir la imagen" };
         }
+        const urls = await generateUrl(res.public_id, image);
+
         return {
           ...image,
-          "new-image": generateUrl(res.public_id),
+          "new-image": urls,
         };
       })
     );
