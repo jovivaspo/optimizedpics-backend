@@ -1,5 +1,6 @@
 const cloudinary = require("../helpers/cloudinary-config");
 const sharp = require("sharp");
+const fetch = require("node-fetch");
 
 const generateUrl = async (public_id, image) => {
   const originalFormat = image.format === "jpeg" ? "jpg" : image.format;

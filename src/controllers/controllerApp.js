@@ -5,6 +5,7 @@ const upload = require("../services/upload-cloudinary");
 const generateUrl = require("../services/generate-url");
 const getName = require("../services/get-name");
 const searchCloudinary = require("../services/search-cloudinary");
+const fetch = require("node-fetch");
 
 const controllerApp = {};
 
