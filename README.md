@@ -1,6 +1,6 @@
 # OptimizedPics
 
-OptimizedPics is a web application that allows you to analyze and optimize the images of a given URL. With this application, you can get statistics on the image's load time, size, and formats, and optimize them through **Cloudinary**. Additionally, you can download the newly optimized versions in different formats, such as WebP, AVIF, or JPEG.
+OptimizedPics is a web application that allows you to analyze and optimize the images of a given URL. With this application, you can get statistics on the image's load time, size, and formats, and optimize them through **Cloudinary**. In addition, you can use the new optimised versions in different formats, such as WebP, AVIF, JPEG, PNG or auto, in which Cloudinary will automatically deliver the most optimised format for the requesting browser.
 
 ## Usage
 
@@ -21,10 +21,3 @@ To use OptimizedPics, follow these steps:
 - **Backend**: Node.js and Express
 
 - **Frontend**: React(Vite) and pure CSS (repository: https://github.com/jovivaspo/optimizedpics-frontend)
-
-
-
-
-
-
-
