@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path")
 const cors = require("cors");
 const helmet = require("helmet");
 require("dotenv").config();
@@ -14,5 +15,14 @@ app.use(express.json());
 app.use(express.static("public"));
 
 app.use("/api", require("./routes/api"));
+
+app.get('/*', function(req, res) {
+    res.sendFile(path.join(__dirname, '../public/index.html'), function(err) {
+     if (err) {
+       res.status(500).send(err)
+     }
+   })
+   })
+
 
 module.exports = app;
