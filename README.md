@@ -20,7 +20,7 @@ To use OptimizedPics, follow these steps:
 
 - **Backend**: Node.js and Express
 
-- **Frontend**: React(Vite) and pure CSS
+- **Frontend**: React(Vite) and pure CSS (repository: https://github.com/jovivaspo/optimizedpics-frontend)
 
 
 
