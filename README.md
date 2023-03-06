@@ -16,6 +16,12 @@ To use OptimizedPics, follow these steps:
 
 5. Wait for the optimization process to complete. Once finished, you will get the optimised image urls ready to be used.
 
+## Technologies used
+
+- **Backend**: Node.js and Express
+
+- **Frontend**: React(Vite) and pure CSS
+
 
 
 
